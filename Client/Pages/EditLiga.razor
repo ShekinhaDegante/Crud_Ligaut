@@ -1,0 +1,125 @@
+﻿@page "/ligas/edit/{Id:int}"
+@using Crud_Ligaut.Shared
+@inject HttpClient client
+@inject NavigationManager navigationManager
+
+<h3>Editar Liga</h3>
+
+<hr />
+<div style="width:60%;">
+    <EditForm Model="liga" OnValidSubmit="Update">
+        <DataAnnotationsValidator />
+
+        <!-- Jugador -->
+        <div class="row mb-3">
+            <label for="jugador" class="col-sm-3 col-form-label">Jugador</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="jugador" @bind-Value="liga.Jugador" />
+                <ValidationMessage For="@(() => liga.Jugador)" />
+            </div>
+        </div>
+
+        <!-- Nombre Completo -->
+        <div class="row mb-3">
+            <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="nombreCompleto" @bind-Value="liga.NombreCompleto" />
+                <ValidationMessage For="@(() => liga.NombreCompleto)" />
+            </div>
+        </div>
+
+        <!-- Número -->
+        <div class="row mb-3">
+            <label for="numero" class="col-sm-3 col-form-label">Número</label>
+            <div class="col-sm-9">
+                <InputNumber class="form-control" id="numero" @bind-Value="liga.Numero" />
+                <ValidationMessage For="@(() => liga.Numero)" />
+            </div>
+        </div>
+
+        <!-- Equipo -->
+        <div class="row mb-3">
+            <label for="equipo" class="col-sm-3 col-form-label">Equipo</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="equipo" @bind-Value="liga.Equipo" />
+                <ValidationMessage For="@(() => liga.Equipo)" />
+            </div>
+        </div>
+
+        <!-- Alias -->
+        <div class="row mb-3">
+            <label for="alias" class="col-sm-3 col-form-label">Alias</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="alias" @bind-Value="liga.Alias" />
+                <ValidationMessage For="@(() => liga.Alias)" />
+            </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="row mb-3">
+            <label for="estado" class="col-sm-3 col-form-label">Estado</label>
+            <div class="col-sm-9">
+                <InputCheckbox id="estado" @bind-Value="isActive" />
+                <ValidationMessage For="@(() => liga.Estado)" />
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <a class="btn btn-secondary col-2 m-1" href="/">
+                Cancelar
+            </a>
+
+            <button class="btn btn-primary col-2 m-1" type="submit">
+                Guardar
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private Liga liga = new Liga();
+    [Parameter] public int Id { get; set; }
+    private bool isActive = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            await LoadLiga();
+        }
+    }
+
+    private async Task LoadLiga()
+    {
+        try
+        {
+            liga = await client.GetFromJsonAsync<Liga>($"api/ligas/getliga/{Id}") ?? new Liga();
+            isActive = liga.Estado == 1; // Establecer el estado del checkbox basado en el valor de la liga.
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar la liga: {ex.Message}");
+        }
+    }
+
+    private async Task Update()
+    {
+        try
+        {
+            liga.Estado = isActive ? 1 : 0; // Convertir el checkbox a un valor de 1 (Activo) o 0 (Inactivo).
+            var response = await client.PutAsJsonAsync($"api/ligas/editligas/{liga.Id}", liga); // Aquí pasamos el ID
+            if (response.IsSuccessStatusCode)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                Console.WriteLine("Error al actualizar la liga.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar la liga: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,108 @@
+﻿@page "/ligas/add"
+@using Crud_Ligaut.Shared
+@inject HttpClient client
+@inject NavigationManager navigationManager
+
+<h3>Crear Jugador</h3>
+
+<hr />
+<div style="width:60%;">
+    <EditForm Model="liga" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+
+        @* Jugador *@
+        <div class="row mb-3">
+            <label for="jugador" class="col-sm-3 col-form-label">Jugador</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="jugador" @bind-Value="@liga.Jugador" />
+                <ValidationMessage For="@(() => liga.Jugador)" />
+            </div>
+        </div>
+
+        @* Nombre Completo *@
+        <div class="row mb-3">
+            <label for="nombreCompleto" class="col-sm-3 col-form-label">Nombre Completo</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="nombreCompleto" @bind-Value="@liga.NombreCompleto" />
+                <ValidationMessage For="@(() => liga.NombreCompleto)" />
+            </div>
+        </div>
+
+        @* Número *@
+        <div class="row mb-3">
+            <label for="numero" class="col-sm-3 col-form-label">Número</label>
+            <div class="col-sm-9">
+                <InputNumber class="form-control" id="numero" @bind-Value="@liga.Numero" />
+                <ValidationMessage For="@(() => liga.Numero)" />
+            </div>
+        </div>
+
+        @* Equipo *@
+        <div class="row mb-3">
+            <label for="equipo" class="col-sm-3 col-form-label">Equipo</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="equipo" @bind-Value="@liga.Equipo" />
+                <ValidationMessage For="@(() => liga.Equipo)" />
+            </div>
+        </div>
+
+        @* Alias *@
+        <div class="row mb-3">
+            <label for="alias" class="col-sm-3 col-form-label">Alias</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" id="alias" @bind-Value="@liga.Alias" />
+                <ValidationMessage For="@(() => liga.Alias)" />
+            </div>
+        </div>
+
+        @* Estado *@
+        <div class="row mb-3">
+            <label for="estado" class="col-sm-3 col-form-label">Estado</label>
+            <div class="col-sm-9">
+                <InputCheckbox id="estado" @bind-Value="@isActive" />
+                <ValidationMessage For="@(() => liga.Estado)" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-sm-6">
+                <button class="btn btn-secondary w-100" @onclick="Cancel">Cancelar</button>
+            </div>
+            <div class="col-sm-6">
+                <button class="btn btn-primary w-100" type="submit">Guardar</button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private Liga liga = new Liga();
+    private bool isActive;
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            liga.Estado = isActive ? 1 : 0; // Convertimos el checkbox a 1 (Activo) o 0 (Inactivo)
+            var response = await client.PostAsJsonAsync("api/ligas/addligas", liga);
+            if (response.IsSuccessStatusCode)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                Console.WriteLine("Error al guardar el jugador.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        navigationManager.NavigateTo("/");
+    }
+}
+
